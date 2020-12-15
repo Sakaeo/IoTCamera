@@ -1,14 +1,11 @@
 # Run with
 # python main.py
 
-import argparse
 import json
 
 from project.configurator.configurator import Configurator, start
 from project.configurator.mqtt_publisher import MqttPublisher
 from project.configurator.mqtt_subscriber import MqttSubscriber
-
-from project.helper.centroid_tracker import CentroidTracker
 
 ret, values = start()
 
@@ -25,7 +22,7 @@ subdomain = values["subdomain"]
 publisher = MqttPublisher(domain, subdomain)
 publisher.connect(broker, port, username, password)
 
-configurator = Configurator()
+configurator = Configurator(publisher)
 
 subscriber = MqttSubscriber(domain, subdomain, configurator)
 subscriber.connect(broker, port, username, password)

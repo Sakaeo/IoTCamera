@@ -1,18 +1,17 @@
 import base64
+import json
 import math
-import string
 import time
 from collections import OrderedDict
-from random import random
 
-from project import mqtt_publisher
-from project.helper.trackable_object import TrackableObject
-from project.helper.centroid_tracker import CentroidTracker
 import cv2
 import dlib
 import numpy as np
-import json
 from imutils.video import FPS
+
+from project import mqtt_publisher
+from project.helper.centroid_tracker import CentroidTracker
+from project.helper.trackable_object import TrackableObject
 
 
 def draw_roi(frame, name, box):
@@ -44,7 +43,7 @@ class Camera:
 
         # Video Source and ROI selection
         # self.vid_capture = cv2.VideoCapture("../../videos/passageway1-c1.avi")
-        # vid_capture = cv2.VideoCapture("../../videos/example_01.mp4")
+        # self.vid_capture = cv2.VideoCapture("../../videos/example_01.mp4")
         # vid_capture = cv2.VideoCapture("../../videos/traffic.mp4")
         self.vid_capture = cv2.VideoCapture(0)
 
@@ -71,7 +70,7 @@ class Camera:
     def read_config(self):
         self.targets = []
         self.rois = OrderedDict()
-        with open("config_life.json") as json_file:
+        with open("config.json") as json_file:
             data = json.load(json_file)
             for t in data["target"]:
                 self.targets.append(t)
@@ -228,6 +227,7 @@ class Camera:
             for roi in self.rois:
                 draw_roi(frame, roi, self.rois[roi])
 
+            # Debugging
             # cv2.imshow("Tracking", frame)
 
             k = cv2.waitKey(5) & 0xFF

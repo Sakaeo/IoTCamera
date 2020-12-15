@@ -8,8 +8,6 @@ from project.camera import Camera
 from project.mqtt_publisher import MqttPublisher
 from project.mqtt_subscriber import MqttSubscriber
 
-from project.helper.centroid_tracker import CentroidTracker
-
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-u", "--username", required=True,

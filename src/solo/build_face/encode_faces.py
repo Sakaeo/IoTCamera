@@ -1,8 +1,9 @@
-from imutils import paths
-import face_recognition
-import pickle
-import cv2
 import os
+import pickle
+
+import cv2
+import face_recognition
+from imutils import paths
 
 dataset = "dataset.jan"
 

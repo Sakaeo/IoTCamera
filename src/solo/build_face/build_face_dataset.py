@@ -1,8 +1,9 @@
-from imutils.video import VideoStream
-import imutils
-import time
-import cv2
 import os
+import time
+
+import cv2
+import imutils
+from imutils.video import VideoStream
 
 # load OpenCV's Haar cascade for face detection from disk
 detector = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")

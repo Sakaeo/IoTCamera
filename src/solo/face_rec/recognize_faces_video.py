@@ -1,9 +1,10 @@
-from imutils.video import VideoStream
-import face_recognition
-import imutils
 import pickle
 import time
+
 import cv2
+import face_recognition
+import imutils
+from imutils.video import VideoStream
 
 # load the known faces and embeddings
 print("[INFO] loading encodings...")

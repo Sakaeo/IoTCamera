@@ -1,4 +1,5 @@
 import json
+
 import paho.mqtt.client as paho
 
 global camera
@@ -40,7 +41,6 @@ def on_message(client, userdata, message):
     topic_id = topic[-1]
 
     msg: dict = json.loads(str(message.payload.decode("utf-8")))
-    print("msg in on {}".format(topic))
 
     if topic_id == "config":
         write_config(msg)
@@ -52,6 +52,6 @@ def on_message(client, userdata, message):
 
 
 def write_config(message):
-    with open("config_life.json", "w") as outfile:
+    with open("config.json", "w") as outfile:
         json.dump(message, outfile)
     print("saved config")

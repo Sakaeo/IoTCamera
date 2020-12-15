@@ -1,8 +1,8 @@
-from skimage.segmentation import clear_border
-import pytesseract
-import numpy as np
-import imutils
 import cv2
+import imutils
+import numpy as np
+import pytesseract
+from skimage.segmentation import clear_border
 
 
 class PyImageSearchANPR:

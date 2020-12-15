@@ -1,9 +1,12 @@
 import base64
 import copy
+import json
 
+import PySimpleGUI as sg
 import cv2
 import numpy as np
-import PySimpleGUI as sg
+
+from project.configurator import mqtt_publisher
 
 
 def start():
@@ -48,12 +51,14 @@ def draw_rois(frame, boxes):
 
 
 class Configurator:
-    def __init__(self):
+    def __init__(self, publisher: mqtt_publisher):
         self.pictures = {}
         self.image = None
         self.waiting_window = None
 
         self.image = None
+
+        self.publisher: mqtt_publisher = publisher
 
         sg.theme("Dark Brown")
 
@@ -85,24 +90,39 @@ class Configurator:
                 self.image = cv2.imdecode(jpg_np, 1)
                 self.waiting_window["ok_button"].update(disabled=False)
 
-    def send_config(self):
-        pass
+    def send_config(self, targets, rois):
+        msg = {
+            "target": targets,
+            "ROI": []
+        }
+        for name, roi in rois.items():
+            msg["ROI"].append({
+                "name": name,
+                "coordinates": [roi[0], roi[1], roi[2], roi[3]]
+            })
+        self.publisher.publish(json.dumps(msg), "test/test/config")
 
     def configure(self, image):
         img_bytes = cv2.imencode(".png", image)[1].tobytes()
         layout = [
             [sg.Image(data=img_bytes, key="img")],
-            [sg.Button(button_text="Add ROI", key="add_roi")],
-            [sg.Text("ROI's", key="list_of_rois")]
+            [sg.Button(button_text="Add ROI", key="add_roi"), sg.Submit()],
+            [sg.Checkbox("Person", key="check_person", enable_events=True),
+             sg.Checkbox("Car", key="check_car", enable_events=True),
+             sg.Checkbox("Bicycle", key="check_bicycle", enable_events=True)],
+            [sg.Text("ROI's :")]
         ]
 
         window = sg.Window('Configurator', layout)
         ROIs = {}
+        targets = []
         while True:
             event, values = window.read()
             if event is None:
                 break
             if event in "add_roi":
+                sg.popup(
+                    "Select a ROI and then press ENTER button!\nCancel the selection process by pressing c button!")
                 roi = cv2.selectROI("ROI select", image, False)
                 cv2.destroyWindow("ROI select")
                 while True:
@@ -111,23 +131,39 @@ class Configurator:
                         sg.popup("Name already used")
                     else:
                         break
-
                 ROIs[name] = roi
-                window.extend_layout(window,
-                                     [[sg.Text("{}: {} ".format(name, roi), key="roi_{}".format(name)),
-                                       sg.Button(button_text="-", key="remove_roi_{}".format(name))]])
             if "remove_roi" in event:
                 name = event.split("_")[2]
-                window["roi_{}".format(name)].update(visible=False)
-                window["roi_{}".format(name)].update(size=[0, 0])
-                window["remove_roi_{}".format(name)].update(visible=False)
-
                 ROIs.pop(name)
+            if event in "Submit":
+                self.send_config(targets, ROIs)
+                window.Close()
+                break
+            if "check" in event:
+                name = event.split("_")[1]
+                if name in targets:
+                    targets.remove(name)
+                else:
+                    targets.append(name)
 
             img_copy = copy.copy(image)
             draw_rois(img_copy, ROIs)
             img_bytes = cv2.imencode(".png", img_copy)[1].tobytes()
-            window["img"].update(data=img_bytes)
+
+            layout = [
+                [sg.Image(data=img_bytes, key="img")],
+                [sg.Button(button_text="Add ROI", key="add_roi"), sg.Submit()],
+                [sg.Checkbox("Person", key="check_person", enable_events=True, default=("person" in targets)),
+                 sg.Checkbox("Car", key="check_car", enable_events=True, default=("car" in targets)),
+                 sg.Checkbox("Bicycle", key="check_bicycle", enable_events=True, default=("bicycle" in targets))],
+                [sg.Text("ROI's :")]
+            ]
+            for name, roi in ROIs.items():
+                layout.append([sg.Text("{}: {} ".format(name, roi), key="roi_{}".format(name)),
+                               sg.Button(button_text="-", key="remove_roi_{}".format(name))])
+
+            window.Close()
+            window = sg.Window('Configurator', layout)
 
     def wait_for_image(self):
         layout = [

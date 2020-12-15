@@ -1,10 +1,12 @@
 from collections import OrderedDict
-from solo.direction.helper.centroid_tracker import CentroidTracker
-from solo.direction.helper.trackable_object import TrackableObject
+
 import cv2
 import dlib
 import numpy as np
 from imutils.video import FPS
+
+from solo.direction.helper.centroid_tracker import CentroidTracker
+from solo.direction.helper.trackable_object import TrackableObject
 
 # Start Arguments
 skip_frame = 5
