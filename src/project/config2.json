@@ -1,0 +1,29 @@
+{
+  "target": [
+    "person",
+    "bus",
+    "bicycle",
+    "car",
+    "motorbike"
+  ],
+  "ROI": [
+    {
+      "name": "Left",
+      "coordinates": [
+        "17",
+        "121",
+        "120",
+        "224"
+      ]
+    },
+    {
+      "name": "Right",
+      "coordinates": [
+        "507",
+        "138",
+        "116",
+        "218"
+      ]
+    }
+  ]
+}

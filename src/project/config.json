@@ -1,0 +1,35 @@
+{
+  "target": [
+    "person",
+    "bicycle"
+  ],
+  "ROI": [
+    {
+      "name": "Side",
+      "coordinates": [
+        "83",
+        "20",
+        "49",
+        "73"
+      ]
+    },
+    {
+      "name": "Back",
+      "coordinates": [
+        "1",
+        "23",
+        "63",
+        "52"
+      ]
+    },
+    {
+      "name": "Front",
+      "coordinates": [
+        "268",
+        "26",
+        "87",
+        "243"
+      ]
+    }
+  ]
+}

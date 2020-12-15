@@ -1,0 +1,25 @@
+{
+  "target": [
+    "person"
+  ],
+  "ROI": [
+    {
+      "name": "Top",
+      "coordinates": [
+        "14",
+        "16",
+        "376",
+        "37"
+      ]
+    },
+    {
+      "name": "Bottom",
+      "coordinates": [
+        "25",
+        "223",
+        "360",
+        "67"
+      ]
+    }
+  ]
+}
