@@ -23,6 +23,9 @@ class MqttSubscriber:
         self.client.connect(broker, port)
         self.client.loop_start()
 
+    def exit(self):
+        self.client.disconnect()
+
     def subscribe(self):
         self.client.subscribe("s2/{}/{}/+/+/snapshot".format(self.domain, self.subdomain))
 
