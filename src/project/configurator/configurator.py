@@ -52,14 +52,12 @@ class Configurator:
             self.pictures[pic_id]["pieces"][pos] = data[2:len(data) - 1]
             self.pictures[pic_id]["count"] += 1
 
-            self.config_window["txt"].update("{}/{}".format(pos, packet_number))
-            print("hi")
+            self.config_window["txt"].update(
+                "Receiving image: {}/{}".format(self.pictures[pic_id]["count"], self.pictures[pic_id]["total"]))
 
             if self.pictures[pic_id]["count"] == self.pictures[pic_id]["total"]:
-                print("img complete")
                 img = ""
 
-                print(self.pictures[pic_id]["total"])
                 for i in range(self.pictures[pic_id]["total"] + 1):
                     img = img + self.pictures[pic_id]["pieces"][i]
 
@@ -72,10 +70,10 @@ class Configurator:
 
     def configure(self):
         layout = [
-            [sg.Text(key="txt", text="{}/{}".format(0, 0))]
+            [sg.Text(key="txt", text="Receiving image: {}/{}".format(0, 0), size=[100,20])]
         ]
 
-        self.config_window = sg.Window('Test', layout)
+        self.config_window = sg.Window('Waiting for image', layout)
 
         while True:
             event, values = self.config_window.read()
