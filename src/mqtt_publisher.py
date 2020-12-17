@@ -21,5 +21,4 @@ class MqttPublisher:
 
 
 def on_publish(ret, userdata, result):  # create function for callback
-    print("data published \n")
     pass

@@ -27,10 +27,10 @@ class MqttSubscriber:
     def subscribe(self):
         self.client.subscribe("s2/{}/{}/+/+/config".format(self.domain, self.subdomain))
         self.client.subscribe("s2/{}/{}/+/+/snapshot_req".format(self.domain, self.subdomain))
+        self.client.subscribe("s2/{}/{}/+/+/fps_req".format(self.domain, self.subdomain))
 
 
 def on_subscribe(client, userdata, mid, granted_qos):
-    print("subscibed\n")
     pass
 
 
@@ -42,13 +42,17 @@ def on_message(client, userdata, message):
 
     msg: dict = json.loads(str(message.payload.decode("utf-8")))
 
-    if topic_id == "config":
+    if topic_id in "config":
         write_config(msg)
         camera.reload_config()
-    elif topic_id == "snapshot_req":
+    elif topic_id in "snapshot_req":
         if "request" in msg:
             if msg["request"]:
                 camera.snapshot()
+    elif topic_id in "fps_request":
+        if "request" in msg:
+            if msg["request"]:
+                camera.publish_fps()
 
 
 def write_config(message):

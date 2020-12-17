@@ -62,6 +62,7 @@ class Camera:
         self.H = None
         self.class_list = []
         self.take_snap = False
+        self.fps = None
 
         # countable variables
         self.totalFrames = 0
@@ -111,10 +112,25 @@ class Camera:
             start += packet_size
             pos = pos + 1
             time.sleep(0.2)
-        print("ok")
+
+    def publish_fps(self):
+        self.fps.stop()
+        fps = {
+            "time_elapsed": self.fps.elapsed(),
+            "fps": self.fps.fps()
+        }
+        self.publisher.publish(json.dumps(fps), "test/test/fps")
+        self.fps = FPS().start()
+
+    def publish_online(self):
+        msg = {
+            "online": True
+        }
+        self.publisher.publish(json.dumps(msg), "test/test/status")
 
     def run_camera(self):
         self.read_config()
+        self.publish_online()
 
         # Load Model
         print("[INFO] loading model...")
@@ -122,17 +138,18 @@ class Camera:
                                        "mobilenet_ssd/MobileNetSSD_deploy.caffemodel")
         # Start FPS counter
         if self.debug:
-            fps = FPS().start()
+            self.fps = FPS().start()
 
         while True:
             _, frame = self.vid_capture.read()
 
             # if end of video
             if frame is None:
+                print("no Frame")
                 break
 
             # resize and convert to rgb for dlib
-            frame = cv2.resize(frame, self.resolution, interpolation =cv2.INTER_AREA)
+            frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_AREA)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # set frame dimensions
@@ -150,7 +167,7 @@ class Camera:
 
             # Only search for objects every 5 frames
             if self.totalFrames % self.skip_frame == 0:
-                totalFrames = 0
+                total_frames = 0
                 # init new set of trackers
                 self.trackers = []
                 self.class_list = []
@@ -232,15 +249,17 @@ class Camera:
             if self.debug:
                 cv2.imshow("Tracking", frame)
                 self.totalFrames += 1
-                fps.update()
+                self.fps.update()
+
+            if self.totalFrames % 300 == 0:
+                self.publish_online()
 
             k = cv2.waitKey(5) & 0xFF
             if k == 27:  # Esc
                 break
-            
+
         if self.debug:
-            fps.stop()
-            print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
-            print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+            self.publish_fps()
+            self.fps.stop()
         cv2.destroyAllWindows()
         self.vid_capture.release()

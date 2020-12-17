@@ -2,7 +2,6 @@
 # python main.py -u struj1 -p qN4qBZu<]QN2 -d dsiot -sd struj1
 
 import argparse
-import json
 
 from camera import Camera
 from mqtt_publisher import MqttPublisher
@@ -21,22 +20,25 @@ ap.add_argument("-sd", "--subdomain", required=True,
 args = vars(ap.parse_args())
 
 broker = "siot1.dsiot.ch"
-port = 1883
 username = args["username"]
 password = args["password"]
 domain = args["domain"]
 subdomain = args["subdomain"]
+port = 1883
+skip_frame = 30
+min_confidence = 0.4
+resolution = (320, 240)
+debug = True
 
 publisher = MqttPublisher(domain, subdomain)
 publisher.connect(broker, port, username, password)
 
-camera = Camera(publisher,30,0.4,(320,240),True)
+camera = Camera(publisher, skip_frame, min_confidence, resolution, debug)
 
 subscriber = MqttSubscriber(domain, subdomain, camera)
 subscriber.connect(broker, port, username, password)
 
 subscriber.subscribe()
-publisher.publish(json.dumps({"online": True}), "test/test/status")
 
 camera.run_camera()
 while True:
