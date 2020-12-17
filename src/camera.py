@@ -34,17 +34,31 @@ def draw_centroid(frame, name, centroid):
 
 
 class Camera:
-    def __init__(self, publisher: mqtt_publisher, skip_frame=5, min_confidence=0.4, resolution=(640, 480), debug=False):
+    def __init__(self, publisher: mqtt_publisher, args):
         # Start Arguments
-        self.skip_frame = skip_frame
-        self.min_confidence = min_confidence
-        self.resolution = resolution
-        self.debug = debug
+        for k, v in args.items():
+            if k is "skip_frame":
+                if v is not None:
+                    self.skip_frame = v
+                else:
+                    self.skip_frame = 5
+            if k is "min_confidence":
+                if v is not None:
+                    self.min_confidence = v
+                else:
+                    self.min_confidence = 0.4
+            if k is "resolution":
+                if v is not None:
+                    self.resolution = v
+                else:
+                    self.resolution = (640, 480)
+            if k is "debug":
+                if v is not None:
+                    self.debug = v
+                else:
+                    self.debug = False
 
         self.publisher: mqtt_publisher = publisher
-
-        # Video Source
-        self.vid_capture = cv2.VideoCapture(0)
 
         # Classes the net Model recognises
         self.CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
@@ -115,11 +129,14 @@ class Camera:
 
     def publish_fps(self):
         self.fps.stop()
-        fps = {
-            "time_elapsed": int(self.fps.elapsed()),
-            "fps": int(self.fps.fps())
-        }
-        self.publisher.publish(json.dumps(fps), "test/test/fps")
+        if self.fps.elapsed() <= 0:
+            pass
+        else:
+            fps = {
+                "time_elapsed": int(self.fps.elapsed()),
+                "fps": int(self.fps.fps())
+            }
+            self.publisher.publish(json.dumps(fps), "test/test/fps")
         self.fps = FPS().start()
 
     def publish_online(self):
@@ -132,20 +149,26 @@ class Camera:
         self.read_config()
         self.publish_online()
 
+        # Video Source
+        vid_capture = cv2.VideoCapture(0)
+
         # Load Model
         print("[INFO] loading model...")
         net = cv2.dnn.readNetFromCaffe("mobilenet_ssd/MobileNetSSD_deploy.prototxt",
                                        "mobilenet_ssd/MobileNetSSD_deploy.caffemodel")
+        print("Done")
         # Start FPS counter
-
         self.fps = FPS().start()
 
+        print("Running...")
+        error = False
         while True:
-            _, frame = self.vid_capture.read()
+            _, frame = vid_capture.read()
 
             # if end of video
             if frame is None:
                 print("no Frame")
+                error = True
                 break
 
             # resize and convert to rgb for dlib
@@ -262,4 +285,6 @@ class Camera:
         self.publish_fps()
         self.fps.stop()
         cv2.destroyAllWindows()
-        self.vid_capture.release()
+        vid_capture.release()
+        print("Camera stopped")
+        return True, error
