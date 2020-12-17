@@ -2,7 +2,7 @@
 # python main.py -u struj1 -p qN4qBZu<]QN2 -d dsiot -sd struj1
 
 # for Raspberry
-# python main.py -u struj1 -p qN4qBZu<]QN2 -d dsiot -sd struj1 -sf 30 -mc 0.4 -r (320,240)
+# python main.py -u struj1 -p qN4qBZu<]QN2 -d dsiot -sd struj1 -sf 30 -mc 0.4 -r 320,240
 
 import argparse
 import time
@@ -26,7 +26,7 @@ ap.add_argument("-sf", "--skip_frame",
 ap.add_argument("-mc", "--min_confidence",
                 help="Min Confidence an object needs to have to be classified (between 0 and 1)")
 ap.add_argument("-r", "--resolution",
-                help="Resolution of the image, lower is faster ex: (with,height)")
+                help="Resolution of the image, lower is faster (ex: with,height)")
 ap.add_argument("-deb", "--debug",
                 help="Ture/False if the image should be shown or not")
 args = vars(ap.parse_args())

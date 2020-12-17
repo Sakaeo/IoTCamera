@@ -49,7 +49,7 @@ class Camera:
                     self.min_confidence = 0.4
             if k is "resolution":
                 if v is not None:
-                    self.resolution = v
+                    self.resolution = "({})".format(v)
                 else:
                     self.resolution = (640, 480)
             if k is "debug":
