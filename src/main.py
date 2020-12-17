@@ -28,7 +28,7 @@ port = 1883
 skip_frame = 30
 min_confidence = 0.4
 resolution = (320, 240)
-debug = True
+debug = False
 
 publisher = MqttPublisher(domain, subdomain)
 publisher.connect(broker, port, username, password)

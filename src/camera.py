@@ -137,8 +137,8 @@ class Camera:
         net = cv2.dnn.readNetFromCaffe("mobilenet_ssd/MobileNetSSD_deploy.prototxt",
                                        "mobilenet_ssd/MobileNetSSD_deploy.caffemodel")
         # Start FPS counter
-        if self.debug:
-            self.fps = FPS().start()
+
+        self.fps = FPS().start()
 
         while True:
             _, frame = self.vid_capture.read()
@@ -248,8 +248,9 @@ class Camera:
             # Debugging
             if self.debug:
                 cv2.imshow("Tracking", frame)
-                self.totalFrames += 1
-                self.fps.update()
+
+            self.totalFrames += 1
+            self.fps.update()
 
             if self.totalFrames % 300 == 0:
                 self.publish_online()
@@ -258,8 +259,7 @@ class Camera:
             if k == 27:  # Esc
                 break
 
-        if self.debug:
-            self.publish_fps()
-            self.fps.stop()
+        self.publish_fps()
+        self.fps.stop()
         cv2.destroyAllWindows()
         self.vid_capture.release()
