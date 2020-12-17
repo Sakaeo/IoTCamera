@@ -12,10 +12,13 @@ sudo apt-get install libjasper-dev
 sudo apt-get install libqtgui4  
 sudo apt-get install libqt4-test 
 
+sudo pip3 install -r requirements.txt
+
+sudo mkdir /root/IoTCamera
+sudo cp -a src /root/IoTCamera
 
 sudo cp iotcamera.defaults /etc/default/iotcamera
-sudo cp  iotcamera.service  /etc/systemd/system/
+sudo cp iotcamera.service /etc/systemd/system/
 sudo systemctl daemon-reload
-
-cd ~/IoTCamera 
-pip3 install -r requirements.txt 
+ 
+ 

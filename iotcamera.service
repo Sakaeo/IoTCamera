@@ -5,13 +5,13 @@ After=network.target rsyslog.service multi-user.target
 [Service]
 Type=simple
 EnvironmentFile=-/etc/default/iotcamera
-ExecStart=/usr/bin/python3 main.py -u "$USERNAME" -p "$PASSWORD" -d "$DOMAIN" -sd "$SUBDOMAIN" -sf $SKIPFRAME -mc $MINCONFIDENCE -r $RESOLUTION > /var/log/iotcamera.log 2>&1
+ExecStart=/usr/bin/python3 main.py -u "$USERNAME" -p "$PASSWORD" -d "$DOMAIN" -sd "$SUBDOMAIN" -sf $SKIPFRAME -mc $MINCONFIDENCE -r $RESOLUTION
 ExecReload=/bin/kill -HUP $MAINPID
-KillMode=mixed
-Restart=on-failure
+#KillMode=mixed
+#Restart=on-failure
 WorkingDirectory=/root/IoTCamera/src/
-RestartPreventExitStatus=255
-SuccessExitStatus=143
+#RestartPreventExitStatus=255
+#SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target
