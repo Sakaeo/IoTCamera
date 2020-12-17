@@ -10,8 +10,8 @@ import numpy as np
 from imutils.video import FPS
 
 import mqtt_publisher
-from helper.centroid_tracker import CentroidTracker
-from helper.trackable_object import TrackableObject
+from centroid_tracker import CentroidTracker
+from trackable_object import TrackableObject
 
 
 def draw_roi(frame, name, box):
@@ -34,17 +34,16 @@ def draw_centroid(frame, name, centroid):
 
 
 class Camera:
-    def __init__(self, publisher: mqtt_publisher, skip_frame=5, min_confidence=0.4):
+    def __init__(self, publisher: mqtt_publisher, skip_frame=5, min_confidence=0.4, resolution=(640, 480), debug=False):
         # Start Arguments
         self.skip_frame = skip_frame
         self.min_confidence = min_confidence
+        self.resolution = resolution
+        self.debug = debug
 
         self.publisher: mqtt_publisher = publisher
 
-        # Video Source and ROI selection
-        # self.vid_capture = cv2.VideoCapture("../../videos/passageway1-c1.avi")
-        # self.vid_capture = cv2.VideoCapture("../../videos/example_01.mp4")
-        # vid_capture = cv2.VideoCapture("../../videos/traffic.mp4")
+        # Video Source
         self.vid_capture = cv2.VideoCapture(0)
 
         # Classes the net Model recognises
@@ -119,10 +118,11 @@ class Camera:
 
         # Load Model
         print("[INFO] loading model...")
-        net = cv2.dnn.readNetFromCaffe("helper/mobilenet_ssd/MobileNetSSD_deploy.prototxt",
-                                       "helper/mobilenet_ssd/MobileNetSSD_deploy.caffemodel")
+        net = cv2.dnn.readNetFromCaffe("mobilenet_ssd/MobileNetSSD_deploy.prototxt",
+                                       "mobilenet_ssd/MobileNetSSD_deploy.caffemodel")
         # Start FPS counter
-        fps = FPS().start()
+        if self.debug:
+            fps = FPS().start()
 
         while True:
             _, frame = self.vid_capture.read()
@@ -132,6 +132,7 @@ class Camera:
                 break
 
             # resize and convert to rgb for dlib
+            frame = cv2.resize(frame, self.resolution, interpolation =cv2.INTER_AREA)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # set frame dimensions
@@ -228,17 +229,18 @@ class Camera:
                 draw_roi(frame, roi, self.rois[roi])
 
             # Debugging
-            # cv2.imshow("Tracking", frame)
+            if self.debug:
+                cv2.imshow("Tracking", frame)
+                self.totalFrames += 1
+                fps.update()
 
             k = cv2.waitKey(5) & 0xFF
             if k == 27:  # Esc
                 break
-
-            self.totalFrames += 1
-            fps.update()
-
-        fps.stop()
-        print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
-        print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+            
+        if self.debug:
+            fps.stop()
+            print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
+            print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
         cv2.destroyAllWindows()
         self.vid_capture.release()

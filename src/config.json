@@ -1,1 +1,1 @@
-{"target": ["person"], "ROI": [{"name": "back", "coordinates": [85, 20, 52, 66]}, {"name": "back2", "coordinates": [3, 25, 48, 51]}, {"name": "front", "coordinates": [298, 15, 53, 253]}]}
+{"target": ["person"], "ROI": [{"name": "bot", "coordinates": [65, 162, 204, 52]}, {"name": "top", "coordinates": [46, 20, 262, 54]}]}

@@ -20,6 +20,6 @@ class MqttPublisher:
         self.client.publish("s2/{}/{}/{}".format(self.domain, self.subdomain, topic), msg)
 
 
-def on_publish(userdata, result):  # create function for callback
+def on_publish(ret, userdata, result):  # create function for callback
     print("data published \n")
     pass

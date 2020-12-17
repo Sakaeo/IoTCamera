@@ -1,5 +1,5 @@
 # Run with
-# python mqtt.py -u struj1 -p qN4qBZu<]QN2 -d dsiot -sd struj1
+# python main.py -u struj1 -p qN4qBZu<]QN2 -d dsiot -sd struj1
 
 import argparse
 import json
@@ -30,7 +30,7 @@ subdomain = args["subdomain"]
 publisher = MqttPublisher(domain, subdomain)
 publisher.connect(broker, port, username, password)
 
-camera = Camera(publisher)
+camera = Camera(publisher,30,0.4,(320,240),True)
 
 subscriber = MqttSubscriber(domain, subdomain, camera)
 subscriber.connect(broker, port, username, password)
