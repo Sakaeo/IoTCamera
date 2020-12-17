@@ -116,8 +116,8 @@ class Camera:
     def publish_fps(self):
         self.fps.stop()
         fps = {
-            "time_elapsed": self.fps.elapsed(),
-            "fps": self.fps.fps()
+            "time_elapsed": int(self.fps.elapsed()),
+            "fps": int(self.fps.fps())
         }
         self.publisher.publish(json.dumps(fps), "test/test/fps")
         self.fps = FPS().start()
