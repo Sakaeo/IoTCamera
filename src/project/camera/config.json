@@ -1,0 +1,25 @@
+{
+  "target": [
+    "person"
+  ],
+  "ROI": [
+    {
+      "name": "bot",
+      "coordinates": [
+        43,
+        171,
+        227,
+        44
+      ]
+    },
+    {
+      "name": "top",
+      "coordinates": [
+        17,
+        17,
+        265,
+        51
+      ]
+    }
+  ]
+}

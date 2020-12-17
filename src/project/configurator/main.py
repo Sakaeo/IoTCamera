@@ -3,9 +3,9 @@
 
 import json
 
-from project.configurator.configurator import Configurator, start
-from project.configurator.mqtt_publisher import MqttPublisher
-from project.configurator.mqtt_subscriber import MqttSubscriber
+from configurator import Configurator, start
+from mqtt_publisher import MqttPublisher
+from mqtt_subscriber import MqttSubscriber
 
 ret, values = start()
 

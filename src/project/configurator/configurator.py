@@ -6,7 +6,7 @@ import PySimpleGUI as sg
 import cv2
 import numpy as np
 
-from project.configurator import mqtt_publisher
+import mqtt_publisher
 
 
 def start():
