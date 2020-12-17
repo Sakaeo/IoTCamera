@@ -1,7 +1,7 @@
 #!/bin/bash
 # First time setup
 
-cd ~/IoTCamera 
+#cd /root/IoTCamera 
 
 sudo pip3 install opencv-python  
 sudo apt-get install libcblas-dev 
@@ -12,6 +12,10 @@ sudo apt-get install libjasper-dev
 sudo apt-get install libqtgui4  
 sudo apt-get install libqt4-test 
 
-pip3 install -r requirements.txt 
 
-sudo cp start_camera.sh /etc/network/if-up.d/
+sudo cp iotcamera.defaults /etc/default/iotcamera
+sudo cp  iotcamera.service  /etc/systemd/system/
+sudo systemctl daemon-reload
+
+cd ~/IoTCamera 
+pip3 install -r requirements.txt 
