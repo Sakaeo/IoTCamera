@@ -1,6 +1,7 @@
 import base64
 import json
 import math
+import sched
 import time
 from collections import OrderedDict
 
@@ -36,20 +37,23 @@ def draw_centroid(frame, name, centroid):
 class Camera:
     def __init__(self, publisher: mqtt_publisher, args):
         # Start Arguments
+        self.publisher: mqtt_publisher = publisher
+
         for k, v in args.items():
             if k is "skip_frame":
                 if v is not None:
-                    self.skip_frame = v
+                    self.skip_frame = int(v)
                 else:
                     self.skip_frame = 5
             if k is "min_confidence":
                 if v is not None:
-                    self.min_confidence = v
+                    self.min_confidence = float(v)
                 else:
                     self.min_confidence = 0.4
             if k is "resolution":
                 if v is not None:
-                    self.resolution = "({})".format(v)
+                    w, h = v.split(",")
+                    self.resolution = (int(w), int(h))
                 else:
                     self.resolution = (640, 480)
             if k is "debug":
@@ -57,8 +61,6 @@ class Camera:
                     self.debug = v
                 else:
                     self.debug = False
-
-        self.publisher: mqtt_publisher = publisher
 
         # Classes the net Model recognises
         self.CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
@@ -68,18 +70,11 @@ class Camera:
 
         # centroid tracker and some inits
         self.ct = CentroidTracker(publisher, maxDisappeared=40, maxDistance=50, )
-        self.trackers = []
-        self.trackableObjects = {}
         self.targets = []
         self.rois = OrderedDict()
-        self.W = None
-        self.H = None
-        self.class_list = []
         self.take_snap = False
         self.fps = None
-
-        # countable variables
-        self.totalFrames = 0
+        self.s = sched.scheduler(time.time, time.sleep)
 
     def read_config(self):
         self.targets = []
@@ -108,7 +103,7 @@ class Camera:
         start = 0
         end = packet_size
         length = len(encoded)
-        pic_id = "snapshot_{}".format(self.totalFrames)
+        pic_id = "snapshot_{}".format(length % 100)
         pos = 0
         packet_number = math.ceil(length / packet_size) - 1
 
@@ -139,15 +134,24 @@ class Camera:
             self.publisher.publish(json.dumps(fps), "test/test/fps")
         self.fps = FPS().start()
 
-    def publish_online(self):
+    def publish_online(self, sc):
         msg = {
             "online": True
         }
         self.publisher.publish(json.dumps(msg), "test/test/status")
+        self.s.enter(60, 1, self.publish_online, (sc,))
 
     def run_camera(self):
+        totalFrames = 0
+        trackers = []
+        trackableObjects = {}
+        W = None
+        H = None
+        class_list = []
+
         self.read_config()
-        self.publish_online()
+
+        self.s.enter(60, 1, self.publish_online, (self.s,))
 
         # Video Source
         vid_capture = cv2.VideoCapture(0)
@@ -176,8 +180,8 @@ class Camera:
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # set frame dimensions
-            if self.W is None or self.H is None:
-                (self.H, self.W) = frame.shape[:2]
+            if W is None or H is None:
+                (H, W) = frame.shape[:2]
 
             # snapshot
             if self.take_snap:
@@ -189,15 +193,15 @@ class Camera:
             rects = []
 
             # Only search for objects every 5 frames
-            if self.totalFrames % self.skip_frame == 0:
-                total_frames = 0
+            if totalFrames % self.skip_frame == 0:
+                totalFrames = 0
                 # init new set of trackers
-                self.trackers = []
-                self.class_list = []
+                trackers = []
+                class_list = []
 
                 # convert the frame to a blob and pass the blob through the
                 # network and obtain the detections
-                blob = cv2.dnn.blobFromImage(frame, 0.007843, (self.W, self.H), 127.5)
+                blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
                 net.setInput(blob)
                 detections = net.forward()
 
@@ -215,39 +219,39 @@ class Camera:
                             continue
 
                         # compute the (x, y)-coordinates of the bounding box
-                        box = detections[0, 0, i, 3:7] * np.array([self.W, self.H, self.W, self.H])
-                        (startX, startY, endX, endY) = box.astype("int")
+                        box = detections[0, 0, i, 3:7] * np.array([W, H, W, H])
+                        (start_x, start_y, end_x, end_y) = box.astype("int")
 
                         # make a dlib rectangle object and start the dlib tracker
                         tracker = dlib.correlation_tracker()
-                        rect = dlib.rectangle(startX, startY, endX, endY)
+                        rect = dlib.rectangle(start_x, start_y, end_x, end_y)
                         tracker.start_track(rgb, rect)
 
-                        self.trackers.append(tracker)
-                        self.class_list.append(target)
+                        trackers.append(tracker)
+                        class_list.append(target)
 
             # use tracker during skipped frames, not object recognition
             else:
-                for tracker in self.trackers:
+                for tracker in trackers:
                     # update the tracker and grab the updated position
                     tracker.update(rgb)
                     pos = tracker.get_position()
 
                     # unpack position object
-                    startX = int(pos.left())
-                    startY = int(pos.top())
-                    endX = int(pos.right())
-                    endY = int(pos.bottom())
+                    start_x = int(pos.left())
+                    start_y = int(pos.top())
+                    end_x = int(pos.right())
+                    end_y = int(pos.bottom())
 
                     # add the box coordinates to the rectangles list
-                    rects.append((startX, startY, endX, endY))
+                    rects.append((start_x, start_y, end_x, end_y))
 
             # use centroids to match old and new centroids and then loop over them
-            (objects, class_dict) = self.ct.update(rects, self.class_list)
+            (objects, class_dict) = self.ct.update(rects, class_list)
 
             for (object_id, centroid) in objects.items():
                 # check if object is in the object list
-                t_object = self.trackableObjects.get(object_id, None)
+                t_object = trackableObjects.get(object_id, None)
 
                 # if there is no existing trackable object, create one
                 if t_object is None:
@@ -257,7 +261,7 @@ class Camera:
                     t_object.centroids.append(centroid)
 
                 # store the trackable object in our dictionary
-                self.trackableObjects[object_id] = t_object
+                trackableObjects[object_id] = t_object
 
                 # draw Centroid
                 text = "ID {}".format(object_id)
@@ -272,11 +276,8 @@ class Camera:
             if self.debug:
                 cv2.imshow("Tracking", frame)
 
-            self.totalFrames += 1
+            totalFrames += 1
             self.fps.update()
-
-            if self.totalFrames % 300 == 0:
-                self.publish_online()
 
             k = cv2.waitKey(5) & 0xFF
             if k == 27:  # Esc
