@@ -1,7 +1,6 @@
 import base64
 import json
 import math
-import sched
 import time
 from collections import OrderedDict
 
@@ -74,7 +73,6 @@ class Camera:
         self.rois = OrderedDict()
         self.take_snap = False
         self.fps = None
-        self.s = sched.scheduler(time.time, time.sleep)
 
     def read_config(self):
         self.targets = []
@@ -134,12 +132,11 @@ class Camera:
             self.publisher.publish(json.dumps(fps), "test/test/fps")
         self.fps = FPS().start()
 
-    def publish_online(self, sc):
+    def publish_online(self):
         msg = {
             "online": True
         }
         self.publisher.publish(json.dumps(msg), "test/test/status")
-        self.s.enter(60, 1, self.publish_online, (sc,))
 
     def run_camera(self):
         totalFrames = 0
@@ -150,8 +147,6 @@ class Camera:
         class_list = []
 
         self.read_config()
-
-        self.s.enter(60, 1, self.publish_online, (self.s,))
 
         # Video Source
         vid_capture = cv2.VideoCapture(0)
@@ -194,7 +189,6 @@ class Camera:
 
             # Only search for objects every 5 frames
             if totalFrames % self.skip_frame == 0:
-                totalFrames = 0
                 # init new set of trackers
                 trackers = []
                 class_list = []
@@ -275,6 +269,11 @@ class Camera:
             # Debugging
             if self.debug:
                 cv2.imshow("Tracking", frame)
+
+            print(totalFrames)
+            if totalFrames % 120 == 0:
+                totalFrames = 0
+                self.publish_online()
 
             totalFrames += 1
             self.fps.update()

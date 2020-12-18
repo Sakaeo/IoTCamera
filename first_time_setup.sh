@@ -19,6 +19,4 @@ sudo cp -a src /root/IoTCamera
 
 sudo cp iotcamera.defaults /etc/default/iotcamera
 sudo cp iotcamera.service /etc/systemd/system/
-sudo systemctl daemon-reload
- 
- 
+sudo systemctl start iotcamera.service
