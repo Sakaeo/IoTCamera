@@ -270,7 +270,6 @@ class Camera:
             if self.debug:
                 cv2.imshow("Tracking", frame)
 
-            print(totalFrames)
             if totalFrames % 120 == 0:
                 totalFrames = 0
                 self.publish_online()
