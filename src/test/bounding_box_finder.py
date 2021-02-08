@@ -1,9 +1,9 @@
 import cv2
 
-vid_capture = cv2.VideoCapture("../../videos/example_01.mp4")
+# vid_capture = cv2.VideoCapture("../../videos/example_01.mp4")
 # vid_capture = cv2.VideoCapture("../../videos/passageway1-c1.avi")
 # vid_capture = cv2.VideoCapture("../../videos/traffic.mp4")
-# vid_capture = cv2.VideoCapture(0)
+vid_capture = cv2.VideoCapture(0)
 
 ret, img = vid_capture.read()
 bounding_boxes = cv2.selectROIs("Tracking", img, False, False)

@@ -25,7 +25,7 @@ def start():
 
     # Create the Window
     sg.theme("Dark Brown")
-    window = sg.Window('Test', layout)
+    window = sg.Window('Configuration', layout)
     # window.Maximize()
     # Event Loop to process "events" and get the "values" of the inputs
     while True:

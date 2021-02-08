@@ -44,9 +44,11 @@ def main():
     # Contour min Area
     cv2.createTrackbar('minContourArea', 'colorTest', 20, 5000, nope)
 
-    vid_capture = cv2.VideoCapture(0)
-    vid_capture.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
-    vid_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+    # vid_capture = cv2.VideoCapture(0)
+    # vid_capture.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
+    # vid_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+
+    frame = cv2.imread("../img/in/Erkennung_01.png")
 
     while True:
         # FPS Count
@@ -63,7 +65,7 @@ def main():
         min_area = cv2.getTrackbarPos('minContourArea', 'colorTest')
 
         # Get webcam frame
-        ret, frame = vid_capture.read()
+        # ret, frame = vid_capture.read()
 
         # Convert the frame to HSV colour model.
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -77,7 +79,7 @@ def main():
         # Show the first mask
         cv2.imshow('mask-dilated', dilated)
 
-        _, contours, hierarchy = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         rect_frame = np.copy(frame)
         for contour in contours:
@@ -94,7 +96,7 @@ def main():
 
         # FPS
         fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
-        cv2.putText(frame, str(int(fps)), (75, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        # cv2.putText(frame, str(int(fps)), (75, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
         # Show final output image
         cv2.imshow('colorTest', frame)

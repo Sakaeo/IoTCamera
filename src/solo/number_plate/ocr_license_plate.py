@@ -20,7 +20,7 @@ imagePaths = sorted(list(paths.list_images("license_plates/group1")))
 # loop over all image paths in the input directory
 for imagePath in imagePaths:
     # load the input image from disk and resize it
-    image = cv2.imread(imagePath)
+    image = cv2.imread("../../img/in/Capture2.PNG")
     image = imutils.resize(image, width=600)
 
     # apply automatic license plate recognition

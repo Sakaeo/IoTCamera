@@ -154,7 +154,8 @@ class Camera:
         self.s.enter(1, 1, self.publish_online, (self.s,))
 
         # Video Source
-        vid_capture = cv2.VideoCapture(0)
+        # vid_capture = cv2.VideoCapture(0)
+        vid_capture = cv2.VideoCapture("../../img/in/campus4-c1.avi")
 
         # Load Model
         print("[INFO] loading model...")
@@ -172,8 +173,10 @@ class Camera:
             # if end of video
             if frame is None:
                 print("no Frame")
-                error = True
-                break
+                vid_capture = cv2.VideoCapture("../../img/in/campus4-c1.avi")
+                _, frame = vid_capture.read()
+                # error = True
+                # break
 
             # resize and convert to rgb for dlib
             frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_AREA)
